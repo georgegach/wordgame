@@ -1,0 +1,17 @@
+{
+  "name": "WordGame",
+  "version": "0.0.0",
+  "description": "It's a game.",
+  "main": "game.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game", "bankofgeorgia", ""
+  ],
+  "author": "georgegach",
+  "license": "MIT",
+  "devDependencies": {
+    // "http-server": "~0.9.0"
+  }
+}
