@@ -30,7 +30,7 @@ Game.play = {
 		this.init();
 	},
 
-	initNewGame : function()
+	initNewGame : function(gameModeCallback)
 	{
 		Game.play.registerPlayer(new Game.Player(prompt("ვინ არის?", "გიორგი"), "255,135,85"));
 		// Game.play.registerPlayer(new Game.Player("George", "255,135,85"));
@@ -43,7 +43,8 @@ Game.play = {
 		Game.play.registerPlayer(new Game.Player("SYS", "68,170,170"));
 		Game.data.AI.push(new Game.AI(Game.data.players[2], 1));
 
-		Game.play.newGame();
+
+		gameModeCallback();
 	},
 
 	roundPopup : function()
@@ -137,8 +138,19 @@ Game.play = {
 
 	infiniteMode : function()
 	{
+		Game.data.players.forEach(function(player)
+		{
+			player.reset();
+		})
+
+		Game.data.deck = new Game.Deck();
+		Game.data.deck.init();
+
+		Game.front.gamePanel.updateLeadersList();
+
 		Game.data.mode = "infinite";
 		// console.log("inifnitemode");
+		Game.play.generateCards(Game.front.revealCards);
 		document.querySelector(".timer").innerHTML = "∞";
 		document.querySelector(".round").innerHTML = "∞";
 		document.querySelector("#RefreshBtn").classList.remove("hidden");
@@ -665,7 +677,7 @@ Game.Words.prototype =
 		return results;
 	},
 
-	_validWords : function(letters, word, results)
+	_validWords : function(letters, word, results, withoutAsterix)
 	{
 
 		if (word === undefined)
@@ -675,6 +687,7 @@ Game.Words.prototype =
 		{
 			if (letters[i] == "*")
 			{
+				var bool = false;
 				for (var j = 0; j < this.alphabet.length; j++) {
 					var nword = word + this.alphabet[j];
 					var search = this.prefix(nword);
@@ -682,7 +695,12 @@ Game.Words.prototype =
 					if (!search.isPrefix && !search.isWord)
 						continue;
 					if (this.prefix(nword).isWord)
-						results.push(nword);
+					{
+						if (withoutAsterix != undefined)
+							results.push(nword);
+						else
+							results.push(word + "*");
+					}
 
 					this._validWords(letters.pop(i), word + this.alphabet[j], results);
 				}
@@ -782,9 +800,7 @@ Game.Words.prototype =
 		})
 
 		// // console.log(results);
-		// var results = results.filter(function(item, pos, self) {
-		//     return item.length > 2;
-		// })
+
 		// console.log(results);
 
 		return results;
@@ -807,6 +823,10 @@ Game.Words.prototype =
 			sortedArray.push([array[i], this.value(array[i])]);
 		} 
 		sortedArray = sortedArray.sort(function(a, b){ return a[1] - b[1]; });
+		// 2-ზე მეტი სიგრძისები
+		sortedArray = sortedArray.filter(function(item, pos, self) {
+		    return item[0].length > 2;
+		})
 		return sortedArray;
 	}
 

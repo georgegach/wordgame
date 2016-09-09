@@ -12,11 +12,17 @@
 		<div class="popup">
 			<h1>როგორ ვითამაშოთ?</h1>
 			<div class="buttonsGroup">
-				<div class="button" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden'); Game.play.initNewGame()">
-					Offline-ში
+				<div class="button" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden'); Game.play.initNewGame(Game.play.newGame)">
+					Offline Normal Mode-ში
 				</div>
 				<br>
 				<input type="range" id="difficulty" value="80"/>
+			</div>
+			<br><br>
+			<div class="buttonsGroup">
+				<div class="button" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden'); Game.play.initNewGame(Game.play.infiniteMode)">
+					Offline Infinite Mode-ში
+				</div>
 			</div>
 			<br><br>
 			<div class="buttonsGroup">
