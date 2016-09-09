@@ -138,7 +138,7 @@ Game.play = {
 	infiniteMode : function()
 	{
 		Game.data.mode = "infinite";
-		console.log("inifnitemode");
+		// console.log("inifnitemode");
 		document.querySelector(".timer").innerHTML = "∞";
 		document.querySelector(".round").innerHTML = "∞";
 		document.querySelector("#RefreshBtn").classList.remove("hidden");
@@ -181,11 +181,11 @@ Game.play = {
 		var search = Game.data.wordlist.find(word);
 		if ( search!= null){
 			Game.data.players[0].score(Game.data.wordlist.value(word));
-			console.log(search, Game.data.wordlist.value(word));
+			// console.log(search, Game.data.wordlist.value(word));
 		}
 		else {
 			Game.data.players[0].score(0);
-			console.log(search, "Not a word.")
+			// console.log(search, "Not a word.")
 		}
 
 		for (var i = 0; i < Game.data.AI.length; i++) {
@@ -339,8 +339,7 @@ Game.front =
 			var table = document.querySelector(".wordlist table");
 			table.innerHTML = "";
 
-			var myCombinations = Game.data.players[0].myLetters().combinations();
-			var choices = Game.data.wordlist.bulkValue(Game.data.wordlist.bulkFind(myCombinations));
+			var choices = Game.data.wordlist.bulkValue(Game.data.wordlist.validWords(Game.data.players[0].myLetters()));
 
 			for (var i = choices.length - 1; i >= 0; i--) 
 			{
@@ -478,28 +477,15 @@ Game.front =
 Game.classExtender =
 {
 	stringExtender : (function() {
-		String.prototype.combinations = function() {
-			var str = this;
-			var fn = function(active, rest, a) 
-			{
-				if (!active && !rest)
-					return;
-				if (!rest) 
-					a.push(active);
-				else 
-				{
-					fn(active + rest[0], rest.slice(1), a);
-					fn(active, rest.slice(1), a);
-				}
-				return a;
-			}
-			return fn("", str, []);
-		};
 
 		String.prototype.element = function() {
 		    var d = document.createElement('div');
 			d.innerHTML = this;
 			return d.firstChild;
+		};
+
+		String.prototype.pop = function(i) {
+			return this.substring(0, i) + this.substring(i + 1);
 		};
 	})(),
 }
@@ -573,7 +559,7 @@ Game.AI.prototype =
 	chooseWord : function()
 	{
 		var wordlist = Game.data.wordlist;
-		var search = wordlist.bulkFind(this.player.myLetters().combinations());
+		var search = wordlist.validWords(this.player.myLetters());
 		var values = wordlist.bulkValue(search);
 		if (values.length > 0)
 			this.player.word = values[Math.floor(this.difficulty*(values.length-1))][0];
@@ -667,6 +653,71 @@ Game.Words.prototype =
 {
 	alphabet : "აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ",
 	
+	validWords : function(letters)
+	{
+		var results = [];
+		this._validWords(letters, "", results);
+
+		results = results.filter(function(item, pos, self) {
+		    return self.indexOf(item) == pos;
+		})
+
+		return results;
+	},
+
+	_validWords : function(letters, word, results)
+	{
+
+		if (word === undefined)
+			word = "";
+
+		for (var i = 0; i < letters.length; i++) 
+		{
+			if (letters[i] == "*")
+			{
+				for (var j = 0; j < this.alphabet.length; j++) {
+					var nword = word + this.alphabet[j];
+					var search = this.prefix(nword);
+
+					if (!search.isPrefix && !search.isWord)
+						continue;
+					if (this.prefix(nword).isWord)
+						results.push(nword);
+
+					this._validWords(letters.pop(i), word + this.alphabet[j], results);
+				}
+			}
+			else
+			{
+				var nword = word + letters[i];
+				var search = this.prefix(nword);
+
+				if (!search.isPrefix && !search.isWord)
+					continue;
+				if (this.prefix(nword).isWord)
+					results.push(nword);
+
+				this._validWords(letters.pop(i), word + letters[i], results);
+			}
+		}
+	},
+
+	prefix : function(str)
+	{
+		var trie = this.trie;
+		for (var i = 0; i < str.length; i++) {
+			if (trie[str[i]] != undefined)
+			{
+				trie = trie[str[i]];
+			}
+			else
+				return false;
+		}
+		if (trie.$)
+			return {isWord: true, isPrefix: true}
+		return { isWord: false, isPrefix: true}
+	},
+
 	_find : function(word)
 	{
 		var trie = this.trie;
@@ -730,9 +781,11 @@ Game.Words.prototype =
 		    return self.indexOf(item) == pos;
 		})
 
-		var results = results.filter(function(item, pos, self) {
-		    return item.length > 2;
-		})
+		// // console.log(results);
+		// var results = results.filter(function(item, pos, self) {
+		//     return item.length > 2;
+		// })
+		// console.log(results);
 
 		return results;
 	},
@@ -803,7 +856,7 @@ Game.Deck.prototype =
 {
 	init : function()
 	{
-		console.log("initializing card deck");
+		// console.log("initializing card deck");
 		var that = this;
 		for( var l in that.config)
 		{
@@ -862,7 +915,7 @@ Game.Deck.prototype =
 	random : function()
 	{
 		var that = this;
-		console.log(that.cards);
+		// console.log(that.cards);
 		if (this.cards.length == 0)
 			this.init();
 		return that.pop(that.cards[ Math.round( Math.random() * ( that.cards.length-1 ) ) ]);
