@@ -11,7 +11,8 @@ Game.data =
 	round : 0,
 	roundLimit : 3,
 	cardStock : null,
-	timerMaxValue : 2,
+	timerMaxValue : 30,
+	timerObject : null,
 	
 };
 
@@ -77,10 +78,9 @@ Game.play = {
 			Game.play.generateCards(Game.front.revealCards);
 
 
-			var interval = setInterval(function()
+			Game.data.timerObject = setInterval(function()
 			{
 				if (timer.innerHTML < 2){
-					clearInterval(interval);
 					Game.play.confirmWord();
 				}
 				timer.innerHTML--;
@@ -178,6 +178,7 @@ Game.play = {
 
 	confirmWord : function()
 	{
+		clearInterval(Game.data.timerObject);
 		var word = Game.data.players[0].word;
 		var search = Game.data.wordlist.find(word);
 		if ( search!= null){
