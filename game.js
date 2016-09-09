@@ -13,6 +13,7 @@ Game.data =
 	cardStock : null,
 	timerMaxValue : 30,
 	timerObject : null,
+	deck : null,
 	
 };
 
@@ -27,14 +28,6 @@ Game.play = {
 	{
 		Game.data.wordlist = new Game.Words(trie);
 		this.init();
-	},
-	
-	initCardStock : function()
-	{
-		// var cards = [];
-		// for (var i = 0; i < Things.length; i++) {
-		// 	Things[i];
-		// }
 	},
 
 	initNewGame : function()
@@ -109,6 +102,8 @@ Game.play = {
 		{
 			player.reset();
 		})
+		Game.data.deck = new Game.Deck();
+		Game.data.deck.init();
 
 		Game.data.round = 0;
 		Game.front.gamePanel.updateLeadersList();
@@ -142,6 +137,7 @@ Game.play = {
 
 	infiniteMode : function()
 	{
+		Game.data.mode = "infinite";
 		console.log("inifnitemode");
 		document.querySelector(".timer").innerHTML = "∞";
 		document.querySelector(".round").innerHTML = "∞";
@@ -161,15 +157,15 @@ Game.play = {
 		for (var i = 0; i < 7; i++) 
 		{
 			Game.data.gameCards[i] = new Game.Card(
-				Game.Alphabet.random()
+				Game.data.deck.random()
 			);
 		}
 
 		// Player cards
 		for (var i = 0; i < Game.data.players.length; i++) {
 			Game.data.players[i].cards([ 
-				new Game.Card( Game.Alphabet.random(), Game.data.players[i].color ),
-				new Game.Card( Game.Alphabet.random(), Game.data.players[i].color )
+				new Game.Card( Game.data.deck.random(), Game.data.players[i].color ),
+				new Game.Card( Game.data.deck.random(), Game.data.players[i].color )
 			]);
 		}
 
@@ -195,7 +191,8 @@ Game.play = {
 		}
 		Game.front.updateWords(Game.front.updateScores);
 		Game.front.gamePanel.updateWordlist();
-		Game.play.roundPopup();
+		if (Game.data.mode != "infinite")
+			Game.play.roundPopup();
 	}
 
 }
@@ -514,10 +511,7 @@ Game.Alphabet =
 
 	array : "აააბგდევზთიიიკლმნოოოპჟრსტუუუფქღყშჩცძწჭხჯჰ***" ,	
 
-	random : function()
-	{
-		return Game.Alphabet.array[ Math.round( Math.random() * ( Game.Alphabet.array.length-1 ) ) ];
-	},
+	
 
 	// პირველი არხის თამაშის სქრინშოტებიდან შეგროვებული მნიშვნელობები
 	value : 
@@ -797,3 +791,94 @@ Game.Card.prototype = {
 	}
 };
 
+Game.Deck = function()
+{
+
+	this.cards = "";
+}
+
+Game.Deck.prototype =
+{
+	init : function()
+	{
+		console.log("initializing card deck");
+		var that = this;
+		for( var l in that.config)
+		{
+			for (var i = 0; i < that.config[l]; i++) {
+				
+				that.cards += l;
+			}
+		}
+	},
+
+	config : 
+	{
+		"ა"	: 4,
+		"ბ"	: 2,
+		"გ"	: 2,
+		"დ"	: 3,
+		"ე"	: 3,
+		"ვ"	: 2,
+		"ზ"	: 1,
+		"თ"	: 2,
+		"ი"	: 4,
+		"კ"	: 2,
+		"ლ"	: 3,
+		"მ"	: 2,
+		"ნ"	: 2,
+		"ო"	: 3,
+		"პ"	: 2,
+		"ჟ"	: 1,
+		"რ"	: 3,
+		"ს"	: 3,
+		"ტ"	: 2,
+		"უ"	: 3,
+		"ფ"	: 1,
+		"ქ"	: 2,
+		"ღ"	: 1,
+		"ყ"	: 2,
+		"შ"	: 2,
+		"ჩ"	: 2,
+		"ც"	: 2,
+		"ძ"	: 2,
+		"წ"	: 2,
+		"ჭ"	: 1,
+		"ხ"	: 2,
+		"ჯ"	: 1,
+		"ჰ"	: 2,
+		"*" : 3,
+	},
+
+	pop : function(letter)
+	{
+		var index = this.cards.indexOf(letter);
+		this.cards = this.cards.substring(0, index)+this.cards.substring(index + 1);
+		return letter;
+	},
+
+	random : function()
+	{
+		var that = this;
+		console.log(that.cards);
+		if (this.cards.length == 0)
+			this.init();
+		return that.pop(that.cards[ Math.round( Math.random() * ( that.cards.length-1 ) ) ]);
+
+	},
+
+	shuffle : function()
+	{
+		var a = this.cards.split(""),
+		    n = a.length;
+
+		for(var i = n - 1; i > 0; i--) {
+		    var j = Math.floor(Math.random() * (i + 1));
+		    var tmp = a[i];
+		    a[i] = a[j];
+		    a[j] = tmp;
+		}
+
+		this.cards = a.join("");
+	},
+}
