@@ -153,6 +153,8 @@ Game.play = {
 
 	generateCards : function(callback)
 	{
+		Game.front.resetWord();
+
 		// Common cards
 		for (var i = 0; i < 7; i++) 
 		{
