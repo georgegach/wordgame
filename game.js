@@ -10,6 +10,8 @@ Game.data =
 	AI : [],
 	round : 0,
 	roundLimit : 3,
+	cardStock : null,
+	timerMaxValue : 2,
 	
 };
 
@@ -18,7 +20,6 @@ Game.play = {
 	init : function()
 	{
 		Game.front.init();
-		this.newGame();
 	},
 
 	initWordlist : function(trie)
@@ -26,48 +27,125 @@ Game.play = {
 		Game.data.wordlist = new Game.Words(trie);
 		this.init();
 	},
-
-	newGame : function()
+	
+	initCardStock : function()
 	{
-		// Game.play.registerPlayer(new Game.Player(prompt("ვინ არის?", "გიორგი"), "255,135,85"));
-		Game.play.registerPlayer(new Game.Player("George", "255,135,85"));
-		Game.play.registerPlayer(new Game.Player("Samantha", "255,85,135"));
-		Game.play.registerPlayer(new Game.Player("God", "68,170,170"));
-		Game.data.AI.push(new Game.AI(Game.data.players[1], 0.8));
-		Game.data.AI.push(new Game.AI(Game.data.players[2], 1));
-		// Game.play.registerPlayer(new Game.Player("Bob", "68,170,170"));
-		// Game.play.registerPlayer(new Game.Player("Charlie", "68,153,255"));
-
-		this.nextRound();
-		
+		// var cards = [];
+		// for (var i = 0; i < Things.length; i++) {
+		// 	Things[i];
+		// }
 	},
+
+	initNewGame : function()
+	{
+		Game.play.registerPlayer(new Game.Player(prompt("ვინ არის?", "გიორგი"), "255,135,85"));
+		// Game.play.registerPlayer(new Game.Player("George", "255,135,85"));
+
+		var difficulty = document.querySelector("#difficulty").value / 100;
+
+		Game.play.registerPlayer(new Game.Player("AI", "255,85,135"));
+		Game.data.AI.push(new Game.AI(Game.data.players[1], difficulty));
+
+		Game.play.registerPlayer(new Game.Player("SYS", "68,170,170"));
+		Game.data.AI.push(new Game.AI(Game.data.players[2], 1));
+
+		Game.play.newGame();
+	},
+
+	roundPopup : function()
+	{
+
+		document.querySelector(".timer").classList.remove(Game.data.timerOnClass);
+		Game.front.popupMessage("რაუნდის დასასრული",
+			"თქვენ დააგროვეთ " + Game.data.players[0].score() + " ქულა!",
+			"Game.play.nextRound()");
+	},
+
+	
 
 	nextRound : function()
 	{
-		document.querySelector(".timer").classList.remove("timerOn");
-		setTimeout(function() {
-			if (Game.data.round <= Game.data.roundLimit){
-				document.querySelector(".gamePanels .round").innerHTML = ++Game.data.round;
-				Game.play.newRound(Game.play.nextRound);
-			}
-		}, 200);
+		Game.play.resetRound();
+
+		if (Game.data.round < Game.data.roundLimit)
+		{
+			var timer = document.querySelector(".timer");
+			timer.classList.add(Game.data.timerOnClass);
+			timer.innerHTML = Game.data.timerMaxValue;
+
+			document.querySelector(".gamePanels .round").innerHTML = ++Game.data.round;
+			Game.play.generateCards(Game.front.revealCards);
+
+
+			var interval = setInterval(function()
+			{
+				if (timer.innerHTML < 2){
+					clearInterval(interval);
+					Game.play.confirmWord();
+				}
+				timer.innerHTML--;
+			}, 1000);
+		}
+		else
+		{
+			Game.play.endGame();
+		}
 		
 	},
 
-	newRound : function(callback)
+	resetRound : function()
 	{
-		Game.play.generateCards(Game.front.revealCards);
-		var timer = document.querySelector(".timer");
-		timer.classList.add("timerOn");
-		timer.innerHTML = 5;
-		var interval = setInterval(function()
+		Game.data.players.forEach(function(player)
 		{
-			if (timer.innerHTML < 2){
-				clearInterval(interval);
-				callback();
-			}
-			timer.innerHTML--;
-		}, 1000);
+			document.querySelector(".player[name='"+ player.name +"'] .playerCards").innerHTML = "";
+			document.querySelector(".player[name='"+ player.name +"'] .score").innerHTML = "&nbsp";
+		})
+		
+	},
+
+	newGame : function()
+	{
+		Game.data.players.forEach(function(player)
+		{
+			player.reset();
+		})
+
+		Game.data.round = 0;
+		Game.front.gamePanel.updateLeadersList();
+
+		if (Game.data.timerMaxValue == 30)
+			Game.data.timerOnClass = "timerOn30s";
+		else if (Game.data.timerMaxValue == 45)
+			Game.data.timerOnClass = "timerOn45s";
+		else
+			Game.data.timerOnClass = "timerOn5s";
+
+		Game.play.nextRound();
+		
+	},
+
+	endGame : function()
+	{
+		Game.front.popupMessage("თამაშის დასასრული",
+								"თამაშის გასაგრძელებლად",
+								[
+									{
+										text:"დაიწყეთ თავიდან",
+										action:"Game.play.newGame()"
+									},
+									{
+										text:"გააგრძელეთ Infinite Mode-ში",
+										action:"Game.play.infiniteMode()"
+									}
+								]);
+	},
+
+	infiniteMode : function()
+	{
+		console.log("inifnitemode");
+		document.querySelector(".timer").innerHTML = "∞";
+		document.querySelector(".round").innerHTML = "∞";
+		document.querySelector("#RefreshBtn").classList.remove("hidden");
 	},
 
 	registerPlayer : function(player)
@@ -102,25 +180,58 @@ Game.play = {
 	{
 		var word = Game.data.players[0].word;
 		var search = Game.data.wordlist.find(word);
-		if ( search!= null)
+		if ( search!= null){
+			Game.data.players[0].score(Game.data.wordlist.value(word));
 			console.log(search, Game.data.wordlist.value(word));
-		else 
+		}
+		else {
+			Game.data.players[0].score(0);
 			console.log(search, "Not a word.")
+		}
 
 		for (var i = 0; i < Game.data.AI.length; i++) {
 			Game.data.AI[i].chooseWord();
 		}
 		Game.front.updateWords(Game.front.updateScores);
 		Game.front.gamePanel.updateWordlist();
+		Game.play.roundPopup();
 	}
 
 }
 
-Game.front = {
+Game.front = 
+{
 	init : function()
 	{
 		this.loadAudio(Game.data.audioPath);
 		this.listener.init();
+	},
+
+	popupMessage : function(title, body, buttons)
+	{
+		document.querySelector(".popupWrapper").classList.remove("hidden");
+		var hidepopup = "this.parentElement.parentElement.parentElement.classList.add('hidden');";
+
+		var popup = document.querySelector(".popupWrapper .popup");
+		popup.querySelector("h1").innerHTML = title;
+		popup.querySelector("p").innerHTML = body;
+
+		var btns = popup.querySelector(".buttonsGroup");
+		btns.innerHTML = "";
+		
+
+		if (buttons.constructor === String)
+		{
+			// Default popup [buttons = action]
+			btns.innerHTML = '<div class="button" onclick="'+hidepopup + buttons +'">გაგრძელება&nbsp;&nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i></div>'
+		}
+		else
+		{
+			buttons.forEach(function(button)
+			{
+				btns.innerHTML += '<div class="button" onclick="'+hidepopup + button.action +'">'+ button.text +'</div>';
+			});
+		}
 	},
 
 	revealCards : function()
@@ -147,7 +258,8 @@ Game.front = {
 			var container = document.querySelector(".player[name='" + Game.data.players[i].name + "'] .playerCards");
 			container.innerHTML = "";
 			var word = Game.data.players[i].word;
-			var hisCards = [Game.data.players[i].cards()[0].letter , Game.data.players[i].cards()[1].letter ];
+			if (Game.data.players[i].cards().length > 0)
+				var hisCards = [Game.data.players[i].cards()[0].letter , Game.data.players[i].cards()[1].letter ];
 			
 			for (var j = 0; j < word.length; j++) 
 			{
@@ -170,7 +282,10 @@ Game.front = {
 		{
 			var container = document.querySelector(".player[name='" + Game.data.players[i].name + "'] .score");
 			container.innerHTML = Game.data.wordlist.value(Game.data.players[i].word);
+			Game.data.players[i].score(Game.data.wordlist.value(Game.data.players[i].word));
 		}
+		Game.front.gamePanel.updateLeadersList();
+		Game.front.updateMyScore();
 	},
 
 	revealPlayer : function(player)
@@ -197,16 +312,13 @@ Game.front = {
 		callback();
 	},
 
-	updateMyScore : function(callback)
+	updateMyScore : function()
 	{
 		var score = 0;
 		for (var i = 0, length = Game.data.players[0].word.length; i < length ; i++) {
 			score += Game.Alphabet.value[ Game.data.players[0].word[i] ]; 
 		}
-		Game.data.players[0].score = score;
-		document.querySelector(".player[name='"+ Game.data.players[0].name +"'] .score").innerHTML = score;
-		
-		// console.log(Game.data.players[0].word, Game.data.players[0].score )
+		document.querySelector(".player[name='"+ Game.data.players[0].name +"'] .score").innerHTML = score!=undefined?score:0;
 	},
 
 	resetWord : function()
@@ -228,7 +340,7 @@ Game.front = {
 			table.innerHTML = "";
 
 			var myCombinations = Game.data.players[0].myLetters().combinations();
-			var choices = Game.data.wordlist.bulkValue(Game.data.wordlist.bulkFind(myCombinations, true));
+			var choices = Game.data.wordlist.bulkValue(Game.data.wordlist.bulkFind(myCombinations));
 
 			for (var i = choices.length - 1; i >= 0; i--) 
 			{
@@ -243,6 +355,39 @@ Game.front = {
 				c3.innerHTML = choices[i][1];
 			}
 
+		},
+
+		updateLeadersList : function()
+		{
+			var table = document.querySelector(".statistics table");
+			table.innerHTML = "";
+
+			var row = table.insertRow(0);
+			var c1 = row.insertCell(0);
+			var c2 = row.insertCell(1);
+			var c3 = row.insertCell(2);
+			c1.innerHTML = "";
+			c2.innerHTML = "<strong>მოთამაშე</strong>";
+			c3.innerHTML = "<strong>ქულა</strong>";
+
+			
+			var topPlayers = Game.data.players.slice(0);
+			topPlayers.sort(function(a,b)
+			{
+				return a.totalScore() < b.totalScore();
+			})
+
+
+			for (var i = 0, l = topPlayers.length; i < l; i++) 
+			{
+				var row = table.insertRow(-1);
+				var c1 = row.insertCell(0);
+				var c2 = row.insertCell(1);
+				var c3 = row.insertCell(2);
+				c1.innerHTML = i+1;
+				c2.innerHTML = topPlayers[i].name;
+				c3.innerHTML = topPlayers[i].totalScore();
+			}
 		}
 	},
 
@@ -273,8 +418,7 @@ Game.front = {
 			document.querySelector(".commonCards .card[name='"+ letter +"']").classList.remove("selected");
 			this.parentNode.removeChild(this);
 			Game.front.updateMyWord( Game.front.updateMyScore );
-		}
-
+		},
 
 	},
 
@@ -282,6 +426,7 @@ Game.front = {
 		init : function(){
 			this.soundBtn();
 			this.kbdShortcuts();
+			// this.popupButton();
 		},
 
 		soundBtn : function()
@@ -313,6 +458,13 @@ Game.front = {
 			   else if (key == 82)
 			 		Game.play.generateCards(Game.front.revealCards);
 			}
+		},
+
+		popupButton : function()
+		{
+			document.querySelector(".popupWrapper .popup div").addEventListener("click", function(event) {
+				document.querySelector(".popupWrapper").classList.add("hidden");
+			}, false);
 		}
 
 
@@ -446,10 +598,18 @@ Game.Player = function(name, color)
 	this.name = name;
 	this.color = color;
 	this.word = "";
-	this.score = 0;
+	this.scoreArray = [];
+	this.cardArray = [];
 }
 
 Game.Player.prototype = {
+	reset : function()
+	{
+		this.word = "";
+		this.scoreArray = [];
+		this.cardArray = [];
+	},
+
 	cards : function(array)
 	{
 		if (array != undefined)
@@ -480,6 +640,19 @@ Game.Player.prototype = {
 		}
 		letters += this.cards()[0].letter + this.cards()[1].letter; 
 		return letters;
+	},
+
+	score : function(value)
+	{
+		if (value != undefined)
+			this.scoreArray.push(value);
+		else
+			return this.scoreArray[this.scoreArray.length-1];
+	},
+
+	totalScore : function()
+	{
+		return this.scoreArray.reduce(function(a,b) { return a+b}, 0);
 	}
 }
 

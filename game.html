@@ -8,6 +8,33 @@
 	<link rel="stylesheet" href="style.css">
 </head>
 <body>
+	<div class="newGameScreen">
+		<div class="popup">
+			<h1>როგორ ვითამაშოთ?</h1>
+			<div class="buttonsGroup">
+				<div class="button" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden'); Game.play.initNewGame()">
+					Offline-ში
+				</div>
+				<br>
+				<input type="range" id="difficulty" value="80"/>
+			</div>
+			<br><br>
+			<div class="buttonsGroup">
+				<div class="button">
+					Online-ში
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="popupWrapper hidden ">
+		<div class="popup">
+			<h1></h1>
+			<p></p>
+			<br>
+			<div class="buttonsGroup"></div>
+		</div>
+	</div>
+
 	<div class="soundIcon">
 		<i class="fa fa-volume-off disabled" aria-="true"></i>
 	</div>
@@ -54,11 +81,15 @@
 				<table>
 					<tr>
 						<td><i class="fa fa-arrow-left" aria-hidden="true"></i> Backspace</td>
-						<td>&nbsp;&nbsp;&nbsp; ღილაკი წასაშლელად</td>
+						<td>&nbsp; ღილაკი წასაშლელად</td>
 					</tr>
 					<tr>
 						<td><i class="fa fa-sign-in" aria-hidden="true"></i> Enter</td>
-						<td>&nbsp;&nbsp;&nbsp; ღილაკი დასადასტურებლად</td>
+						<td>&nbsp; ღილაკი დასადასტურებლად</td>
+					</tr>
+					<tr id="RefreshBtn" class="hidden">
+						<td>R</td>
+						<td>&nbsp; ღილაკი ახალი კარტებისთვის</td>
 					</tr>
 				</table>
 				
@@ -78,6 +109,9 @@
 		</div>
 	</div>
 	
+	<div class="resourceLoader hidden">
+		<i class="fa fa-chevron-right" aria-hidden="true"></i>
+	</div>
 
 	<script src="game.js"></script>
 	<script src="words/wtrie.js"></script>
