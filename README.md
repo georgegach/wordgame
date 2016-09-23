@@ -35,7 +35,7 @@ php composer install
 ```bash
 mysql db_name < game.sql
 ```
-4) გაუშვით მთავარი NodeJS სერვერი
+4) გადმოწერეთ [NodeJS](https://nodejs.org/en/download/) დამოკიდებულებები და გაუშვით მთავარი სერვერი
 ```bash
 npm install
 node server.js
