@@ -5,31 +5,32 @@
 	<title>სიტყვობანა</title>
 	<link href="https://fonts.googleapis.com/css?family=Exo:400" rel="stylesheet">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
-	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-	<div class="newGameScreen">
-		<div class="popup">
-			<h1>როგორ ვითამაშოთ?</h1>
-			<div class="buttonsGroup">
-				<div class="button" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden'); Game.play.initNewGame(Game.play.newGame)">
-					Offline Normal Mode-ში
+
+	<div class="newGameScreenWrapper">
+		<div class="newGameScreen">
+			<div class="options">
+				<div class="buttonsGroup">
+					<div class="button" onclick="this.parentElement.parentElement.parentElement.parentElement.classList.add('hidden'); loadOfflineModules()">
+						Offline
+					</div>
+					<br>
+					<input type="range" id="difficulty" value="80"/>
 				</div>
-				<br>
-				<input type="range" id="difficulty" value="80"/>
-			</div>
-			<br><br>
-			<div class="buttonsGroup">
-				<div class="button" onclick="this.parentElement.parentElement.parentElement.classList.add('hidden'); Game.play.initNewGame(Game.play.infiniteMode)">
-					Offline Infinite Mode-ში
-				</div>
-			</div>
-			<br><br>
-			<div class="buttonsGroup">
-				<div class="button">
-					Online-ში
+				<br><br>
+				<div class="buttonsGroup">
+					<div class="button" onclick="this.parentElement.parentElement.parentElement.parentElement.classList.add('hidden'); loadOnlineModules()">
+						Online
+					</div>
 				</div>
 			</div>
+<!-- 
+			<div class="chatroom">
+				<iframe src="http://ggach.me:9999/frame"></iframe>
+			</div> -->
+
 		</div>
 	</div>
 	<div class="popupWrapper hidden ">
@@ -42,14 +43,19 @@
 	</div>
 
 	<div class="soundIcon">
-		<i class="fa fa-volume-off disabled" aria-="true"></i>
+		<i class="fa fa-volume-off " aria-="true"></i>
 	</div>
+
+	<div class="exitIcon">
+		<i class="fa fa-sign-out" aria-hidden="true"></i>
+	</div>
+	
 	<div class="gamePanels">
 		<div class="timer">
-			
+			∞
 		</div>
 		<div class="statistics">
-			<div class="round">3</div>
+			<div class="round">∞</div>
 			<table cellspacing="0">
 				<tr>
 					<th></th>
@@ -58,26 +64,27 @@
 				</tr>
 				<tr>
 					<td>1</td>
-					<td>God</td>
-					<td>43</td>
-				</tr>
-				<tr>
-					<td>2</td>
-					<td>George</td>
-					<td>23</td>
-				</tr>
-				<tr>
-					<td>3</td>
-					<td>Samantha</td>
-					<td>20</td>
+					<td>You</td>
+					<td>0</td>
 				</tr>
 			</table>		
 		</div>
 		
-		<div class="wordlist">
+		<div class="chatbox hidden" >
+			<ul id="messages"></ul>
+			<form class="chat" onsubmit="return Game.play.sendMessage()">
+				<input type="text" id="m" placeholder="აკრიფეთ ტექსტი..." autofocus autocomplete="off" />
+				<input type="submit" value="გაგზავნა" >
+			</form>
+		</div>
+		<div class="wordlist hidden">
 			<table cellspacing="0">
 			</table>		
 		</div>
+
+<!-- 		<div class="chatroom">
+			<iframe src="http://ggach.me:9999/frame" frameborder="0"></iframe>
+		</div> -->
 
 		
 	</div>
@@ -89,8 +96,8 @@
 						<td><i class="fa fa-arrow-left" aria-hidden="true"></i> Backspace</td>
 						<td>&nbsp; ღილაკი წასაშლელად</td>
 					</tr>
-					<tr>
-						<td><i class="fa fa-sign-in" aria-hidden="true"></i> Enter</td>
+					<tr class="hidden">
+						<td><i class="fa fa-sign-in " aria-hidden="true"></i> Enter</td>
 						<td>&nbsp; ღილაკი დასადასტურებლად</td>
 					</tr>
 					<tr id="RefreshBtn" class="hidden">
@@ -111,7 +118,9 @@
 			
 		</div>
 		<div class="flexRow players">
-	
+			<div class="loading">
+				<div class="signal"></div>
+			</div>
 		</div>
 	</div>
 	
@@ -119,13 +128,7 @@
 		<i class="fa fa-chevron-right" aria-hidden="true"></i>
 	</div>
 
-	<script src="game.js"></script>
-	<script src="words/wtrie.js"></script>
-	<script>
-		(function()
-		{
-			// Game.play.init();
-		})();
-	</script>
+	<script src="socket.io/socket.io.js"></script>
+	<script data-main="scripts/main" src="scripts/require.js"></script>
 </body>
 </html>

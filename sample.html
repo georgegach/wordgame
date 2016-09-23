@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sample</title>
+</head>
+<body>
+	<h1>Hello</h1>
+	<script>
+		socket = io();
+		socket.on('update', function(data)
+		{
+			console.log(data);
+		});
+
+
+	</script>
+</body>
+</html>
