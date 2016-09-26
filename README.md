@@ -1,5 +1,7 @@
 # სიტყვების თამაში 
-v.2.0.0 (alpha) [Demo](https://georgegach.github.io/wordgame/)
+Master v.2.0.0 (alpha)
+
+gh-pages v.1.x [Demo](https://georgegach.github.io/wordgame/)
 ***
 
 ## განახლება #2
