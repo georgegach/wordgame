@@ -47,5 +47,4 @@ node server.js
 ![alt text](https://github.com/georgegach/wordgame/raw/master/docs/screen.png)
 
 
-### მონაცემთა ბაზის დიაგრამა
-![alt text](https://github.com/georgegach/wordgame/raw/master/DB/design.JPG)
+
